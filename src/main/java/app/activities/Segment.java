@@ -1,7 +1,6 @@
 package app.activities;
 
 import java.time.LocalDateTime;
-import java.time.Month;
 
 public class Segment implements Schedulable {
     private Activity parent;

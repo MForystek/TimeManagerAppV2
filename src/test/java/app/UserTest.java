@@ -1,8 +1,8 @@
 package app;
 
-import app.exceptions.ActivityNotEligibleToBeBoughtException;
+import app.exceptions.BuyingException;
 import app.exceptions.ActivityNotEligibleToBeSoldException;
-import app.exceptions.ActivityNotFoundException;
+import app.exceptions.DeletingException;
 import app.activities.PeriodicActivity;
 import app.activities.ProjectActivity;
 import org.junit.jupiter.api.AfterEach;
@@ -23,6 +23,8 @@ class UserTest {
     void after() {
         user = null;
     }
+
+    //TODO Change tests to be compatible with changes in User
 
     @Test
     void addActivityDuty() {
@@ -64,8 +66,8 @@ class UserTest {
         user.addActivity(periodicActivity);
         user.addActivity(projectActivity);
 
-        assertTrue(user.notBoughtPleasures.containsValue(periodicActivity));
-        assertTrue(user.notBoughtPleasures.containsValue(projectActivity));
+        assertTrue(user.activitiesContainer.notBoughtPleasuresContainsValue(periodicActivity));
+        assertTrue(user.activitiesContainer.notBoughtPleasuresContainsValue(projectActivity));
     }
 
     @Test
@@ -89,13 +91,13 @@ class UserTest {
         try {
             user.delActivity(periodicActivity);
             user.delActivity(projectActivity);
-        } catch (ActivityNotFoundException e) {
+        } catch (DeletingException e) {
             e.printStackTrace();
             fail();
         }
 
-        assertFalse(user.notScheduledActivities.containsValue(periodicActivity));
-        assertFalse(user.notScheduledActivities.containsValue(projectActivity));
+        assertFalse(user.activitiesContainer.notScheduledActivitiesContainsValue(periodicActivity));
+        assertFalse(user.activitiesContainer.notScheduledActivitiesContainsValue(projectActivity));
     }
 
     @Test
@@ -119,7 +121,7 @@ class UserTest {
         try {
             user.delActivity(periodicActivity);
             user.delActivity(projectActivity);
-        } catch (ActivityNotFoundException e) {
+        } catch (DeletingException e) {
             e.printStackTrace();
             fail();
         }
@@ -142,8 +144,8 @@ class UserTest {
                 300,
                 300,
                 false);
-        assertThrows(ActivityNotFoundException.class, () -> user.delActivity(periodicActivity));
-        assertThrows(ActivityNotFoundException.class, () -> user.delActivity(projectActivity));
+        assertThrows(DeletingException.class, () -> user.delActivity(periodicActivity));
+        assertThrows(DeletingException.class, () -> user.delActivity(projectActivity));
     }
 
     @Test
@@ -170,7 +172,7 @@ class UserTest {
         try {
             user.buyPleasure(periodicActivity);
             user.buyPleasure(projectActivity);
-        } catch (ActivityNotEligibleToBeBoughtException e) {
+        } catch (BuyingException e) {
             e.printStackTrace();
         }
 
@@ -196,8 +198,8 @@ class UserTest {
         user.addActivity(periodicActivity);
         user.addActivity(projectActivity);
 
-        assertThrows(ActivityNotEligibleToBeBoughtException.class, () -> user.buyPleasure(periodicActivity));
-        assertThrows(ActivityNotEligibleToBeBoughtException.class, () -> user.buyPleasure(projectActivity));
+        assertThrows(BuyingException.class, () -> user.buyPleasure(periodicActivity));
+        assertThrows(BuyingException.class, () -> user.buyPleasure(projectActivity));
     }
 
     @Test
@@ -215,8 +217,8 @@ class UserTest {
                 300,
                 true);
 
-        assertThrows(ActivityNotEligibleToBeBoughtException.class, () -> user.buyPleasure(periodicActivity));
-        assertThrows(ActivityNotEligibleToBeBoughtException.class, () -> user.buyPleasure(projectActivity));
+        assertThrows(BuyingException.class, () -> user.buyPleasure(periodicActivity));
+        assertThrows(BuyingException.class, () -> user.buyPleasure(projectActivity));
     }
 
     @Test
@@ -237,8 +239,8 @@ class UserTest {
         user.addActivity(periodicActivity);
         user.addActivity(projectActivity);
 
-        assertThrows(ActivityNotEligibleToBeBoughtException.class, () -> user.buyPleasure(periodicActivity));
-        assertThrows(ActivityNotEligibleToBeBoughtException.class, () -> user.buyPleasure(projectActivity));
+        assertThrows(BuyingException.class, () -> user.buyPleasure(periodicActivity));
+        assertThrows(BuyingException.class, () -> user.buyPleasure(projectActivity));
     }
 
     @Test
@@ -255,7 +257,7 @@ class UserTest {
         user.addActivity(periodicActivity);
         try {
             user.buyPleasure(periodicActivity);
-        } catch (ActivityNotEligibleToBeBoughtException e) {
+        } catch (BuyingException e) {
             e.printStackTrace();
         }
 
@@ -286,7 +288,7 @@ class UserTest {
 
             user.sellPleasure(periodicActivity);
             user.sellPleasure(projectActivity);
-        } catch (ActivityNotEligibleToBeBoughtException | ActivityNotEligibleToBeSoldException e) {
+        } catch (BuyingException | ActivityNotEligibleToBeSoldException e) {
             e.printStackTrace();
         }
 
@@ -352,7 +354,7 @@ class UserTest {
         try {
             user.buyPleasure(periodicActivity);
             user.sellPleasure(periodicActivity);
-        } catch (ActivityNotEligibleToBeBoughtException | ActivityNotEligibleToBeSoldException e) {
+        } catch (BuyingException | ActivityNotEligibleToBeSoldException e) {
             e.printStackTrace();
         }
 

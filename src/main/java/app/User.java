@@ -1,9 +1,10 @@
 package app;
 
-import app.exceptions.ActivityNotEligibleToBeBoughtException;
+import app.exceptions.BuyingException;
 import app.exceptions.ActivityNotEligibleToBeSoldException;
-import app.exceptions.ActivityNotFoundException;
+import app.exceptions.DeletingException;
 import app.activities.*;
+import app.exceptions.AddingException;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -13,8 +14,10 @@ import java.util.List;
 import java.util.Map;
 
 public class User implements Serializable {
+    //TODO Change methods in class to call ActivitiesContainer instead of fields, then remove unnecessary fields
+    //TODO Ensure that logic related to adding and removing clocks works after upper changes
 
-    private ActivitiesContainer activitiesContainer;
+    protected ActivitiesContainer activitiesContainer;
 
     protected Map<Integer, Activity> notBoughtPleasures;
     protected Map<Integer, Activity> notScheduledActivities;
@@ -32,6 +35,11 @@ public class User implements Serializable {
     }
 
     public void addActivity(Activity activity) {
+        try {
+            activitiesContainer.addActivity(activity);
+        } catch (AddingException e) {
+            e.printStackTrace();
+        }
         if (activity.isPleasure() && !notScheduledActivities.containsValue(activity)) {
             notBoughtPleasures.put(activity.getId(), activity);
         } else {
@@ -39,23 +47,24 @@ public class User implements Serializable {
         }
     }
 
-    public void delActivity(Activity activity) throws ActivityNotFoundException {
+    public void delActivity(Activity activity) throws DeletingException {
+        activitiesContainer.delActivity(activity);
         if (activity.isPleasure() && notBoughtPleasures.containsValue(activity)) {
                 notBoughtPleasures.remove(activity.getId());
         } else if (!activity.isPleasure() && notScheduledActivities.containsValue(activity)) {
                 notScheduledActivities.remove(activity.getId());
         } else {
-            throw new ActivityNotFoundException();
+            throw new DeletingException("Activity you try to delete was not added");
         }
     }
 
-    public void buyPleasure(Activity activity) throws ActivityNotEligibleToBeBoughtException {
+    public void buyPleasure(Activity activity) throws BuyingException {
         if (isEligibleToBeBought(activity)) {
             notScheduledActivities.put(activity.getId(), activity);
             notBoughtPleasures.remove(activity.getId());
             clocks -= activity.getValueInClocks();
         } else {
-            throw new ActivityNotEligibleToBeBoughtException();
+            throw new BuyingException();
         }
     }
 

@@ -50,10 +50,6 @@ public abstract class Activity implements Serializable {
         return durationInSeconds;
     }
 
-    public void setPleasure(boolean isPleasure) {
-        this.isPleasure = isPleasure;
-    }
-
     public boolean isPleasure() {
         return isPleasure;
     }
