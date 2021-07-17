@@ -1,7 +1,8 @@
 package app;
 
+import app.exceptions.AddingException;
 import app.exceptions.BuyingException;
-import app.exceptions.ActivityNotEligibleToBeSoldException;
+import app.exceptions.SellingException;
 import app.exceptions.DeletingException;
 import app.activities.PeriodicActivity;
 import app.activities.ProjectActivity;
@@ -27,29 +28,7 @@ class UserTest {
     //TODO Change tests to be compatible with changes in User
 
     @Test
-    void addActivityDuty() {
-        PeriodicActivity periodicActivity = new PeriodicActivity(
-                "Periodic",
-                "Do it as many times as you want",
-                13,
-                5,
-                false);
-        ProjectActivity projectActivity = new ProjectActivity(
-                "Project",
-                "Something bigger",
-                300,
-                300,
-                false);
-
-        user.addActivity(periodicActivity);
-        user.addActivity(projectActivity);
-
-        assertTrue(user.notScheduledActivities.containsValue(periodicActivity));
-        assertTrue(user.notScheduledActivities.containsValue(projectActivity));
-    }
-
-    @Test
-    void addActivityPleasure() {
+    void addActivity() {
         PeriodicActivity periodicActivity = new PeriodicActivity(
                 "Periodic",
                 "Do it as many times as you want",
@@ -61,47 +40,22 @@ class UserTest {
                 "Something bigger",
                 300,
                 300,
-                true);
-
-        user.addActivity(periodicActivity);
-        user.addActivity(projectActivity);
-
-        assertTrue(user.activitiesContainer.notBoughtPleasuresContainsValue(periodicActivity));
-        assertTrue(user.activitiesContainer.notBoughtPleasuresContainsValue(projectActivity));
-    }
-
-    @Test
-    void delActivityDuty() {
-        PeriodicActivity periodicActivity = new PeriodicActivity(
-                "Periodic",
-                "Do it as many times as you want",
-                13,
-                5,
                 false);
-        ProjectActivity projectActivity = new ProjectActivity(
-                "Project",
-                "Something bigger",
-                300,
-                300,
-                false);
-
-        user.addActivity(periodicActivity);
-        user.addActivity(projectActivity);
 
         try {
-            user.delActivity(periodicActivity);
-            user.delActivity(projectActivity);
-        } catch (DeletingException e) {
+            user.addActivity(periodicActivity);
+            user.addActivity(projectActivity);
+        } catch (AddingException e) {
             e.printStackTrace();
             fail();
         }
 
-        assertFalse(user.activitiesContainer.notScheduledActivitiesContainsValue(periodicActivity));
-        assertFalse(user.activitiesContainer.notScheduledActivitiesContainsValue(projectActivity));
+        assertTrue(user.getActivitiesContainer().notBoughtPleasuresContainsValue(periodicActivity));
+        assertTrue(user.getActivitiesContainer().notScheduledActivitiesContainsValue(projectActivity));
     }
 
     @Test
-    void delActivityPleasure() {
+    void addingAddedActivityThrowsException() {
         PeriodicActivity periodicActivity = new PeriodicActivity(
                 "Periodic",
                 "Do it as many times as you want",
@@ -113,21 +67,47 @@ class UserTest {
                 "Something bigger",
                 300,
                 300,
-                true);
-
-        user.addActivity(periodicActivity);
-        user.addActivity(projectActivity);
+                false);
 
         try {
-            user.delActivity(periodicActivity);
-            user.delActivity(projectActivity);
-        } catch (DeletingException e) {
+            user.addActivity(periodicActivity);
+            user.addActivity(projectActivity);
+        } catch (AddingException e) {
             e.printStackTrace();
             fail();
         }
 
-        assertFalse(user.notBoughtPleasures.containsValue(periodicActivity));
-        assertFalse(user.notBoughtPleasures.containsValue(projectActivity));
+        assertThrows(AddingException.class, () -> user.addActivity(periodicActivity));
+        assertThrows(AddingException.class, () -> user.addActivity(projectActivity));
+    }
+
+    @Test
+    void delActivity() {
+        PeriodicActivity periodicActivity = new PeriodicActivity(
+                "Periodic",
+                "Do it as many times as you want",
+                13,
+                5,
+                false);
+        ProjectActivity projectActivity = new ProjectActivity(
+                "Project",
+                "Something bigger",
+                300,
+                300,
+                true);
+
+        try {
+            user.addActivity(periodicActivity);
+            user.addActivity(projectActivity);
+            user.delActivity(periodicActivity);
+            user.delActivity(projectActivity);
+        } catch (AddingException | DeletingException e) {
+            e.printStackTrace();
+            fail();
+        }
+
+        assertFalse(user.getActivitiesContainer().notScheduledActivitiesContainsValue(periodicActivity));
+        assertFalse(user.getActivitiesContainer().notBoughtPleasuresContainsValue(projectActivity));
     }
 
     @Test
@@ -137,15 +117,21 @@ class UserTest {
                 "Do it as many times as you want",
                 13,
                 5,
-                false);
+                true);
         ProjectActivity projectActivity = new ProjectActivity(
                 "Project",
                 "Something bigger",
                 300,
                 300,
                 false);
+
         assertThrows(DeletingException.class, () -> user.delActivity(periodicActivity));
         assertThrows(DeletingException.class, () -> user.delActivity(projectActivity));
+    }
+
+    @Test
+    void deletingBoughtPleasureThrowsException() {
+        //TODO implement it and change other below tests
     }
 
     @Test
@@ -163,21 +149,20 @@ class UserTest {
                 300,
                 true);
 
-
-        user.addActivity(periodicActivity);
-        user.addActivity(projectActivity);
-
         user.setClocks(1000);
 
         try {
+            user.addActivity(periodicActivity);
+            user.addActivity(projectActivity);
             user.buyPleasure(periodicActivity);
             user.buyPleasure(projectActivity);
-        } catch (BuyingException e) {
+        } catch (AddingException | BuyingException e) {
             e.printStackTrace();
+            fail();
         }
 
-        assertTrue(user.notScheduledActivities.containsValue(periodicActivity));
-        assertTrue(user.notScheduledActivities.containsValue(projectActivity));
+        assertTrue(user.getActivitiesContainer().notScheduledActivitiesContainsValue(periodicActivity));
+        assertTrue(user.getActivitiesContainer().notScheduledActivitiesContainsValue(projectActivity));
     }
 
     @Test
@@ -195,8 +180,13 @@ class UserTest {
                 300,
                 false);
 
-        user.addActivity(periodicActivity);
-        user.addActivity(projectActivity);
+        try {
+            user.addActivity(periodicActivity);
+            user.addActivity(projectActivity);
+        } catch (AddingException e) {
+            e.printStackTrace();
+            fail();
+        }
 
         assertThrows(BuyingException.class, () -> user.buyPleasure(periodicActivity));
         assertThrows(BuyingException.class, () -> user.buyPleasure(projectActivity));
@@ -236,8 +226,13 @@ class UserTest {
                 300,
                 true);
 
-        user.addActivity(periodicActivity);
-        user.addActivity(projectActivity);
+        try {
+            user.addActivity(periodicActivity);
+            user.addActivity(projectActivity);
+        } catch (AddingException e) {
+            e.printStackTrace();
+            fail();
+        }
 
         assertThrows(BuyingException.class, () -> user.buyPleasure(periodicActivity));
         assertThrows(BuyingException.class, () -> user.buyPleasure(projectActivity));
@@ -252,13 +247,14 @@ class UserTest {
                 5,
                 true);
 
-
         user.setClocks(20);
-        user.addActivity(periodicActivity);
+
         try {
+            user.addActivity(periodicActivity);
             user.buyPleasure(periodicActivity);
-        } catch (BuyingException e) {
+        } catch (AddingException | BuyingException e) {
             e.printStackTrace();
+            fail();
         }
 
         assertEquals(7, user.getClocks());
@@ -279,21 +275,23 @@ class UserTest {
                 300,
                 true);
 
-        user.addActivity(periodicActivity);
-        user.addActivity(projectActivity);
         user.setClocks(500);
         try {
+            user.addActivity(periodicActivity);
+            user.addActivity(projectActivity);
+
             user.buyPleasure(periodicActivity);
             user.buyPleasure(projectActivity);
 
             user.sellPleasure(periodicActivity);
             user.sellPleasure(projectActivity);
-        } catch (BuyingException | ActivityNotEligibleToBeSoldException e) {
+        } catch (AddingException | BuyingException | SellingException e) {
             e.printStackTrace();
+            fail();
         }
 
-        assertFalse(user.notScheduledActivities.containsValue(periodicActivity));
-        assertFalse(user.notScheduledActivities.containsValue(projectActivity));
+        assertFalse(user.getActivitiesContainer().notScheduledActivitiesContainsValue(periodicActivity));
+        assertFalse(user.getActivitiesContainer().notScheduledActivitiesContainsValue(projectActivity));
     }
 
     @Test
@@ -311,11 +309,16 @@ class UserTest {
                 300,
                 false);
 
-        user.addActivity(periodicActivity);
-        user.addActivity(projectActivity);
+        try {
+            user.addActivity(periodicActivity);
+            user.addActivity(projectActivity);
+        } catch (AddingException e) {
+            e.printStackTrace();
+            fail();
+        }
 
-        assertThrows(ActivityNotEligibleToBeSoldException.class, () -> user.sellPleasure(periodicActivity));
-        assertThrows(ActivityNotEligibleToBeSoldException.class, () -> user.sellPleasure(projectActivity));
+        assertThrows(SellingException.class, () -> user.sellPleasure(periodicActivity));
+        assertThrows(SellingException.class, () -> user.sellPleasure(projectActivity));
     }
 
     @Test
@@ -333,10 +336,15 @@ class UserTest {
                 300,
                 true);
 
-        user.addActivity(periodicActivity);
+        try {
+            user.addActivity(periodicActivity);
+        } catch (AddingException e) {
+            e.printStackTrace();
+            fail();
+        }
 
-        assertThrows(ActivityNotEligibleToBeSoldException.class, () -> user.sellPleasure(periodicActivity));
-        assertThrows(ActivityNotEligibleToBeSoldException.class, () -> user.sellPleasure(projectActivity));
+        assertThrows(SellingException.class, () -> user.sellPleasure(periodicActivity));
+        assertThrows(SellingException.class, () -> user.sellPleasure(projectActivity));
     }
 
     @Test
@@ -350,12 +358,13 @@ class UserTest {
 
 
         user.setClocks(20);
-        user.addActivity(periodicActivity);
         try {
+            user.addActivity(periodicActivity);
             user.buyPleasure(periodicActivity);
             user.sellPleasure(periodicActivity);
-        } catch (BuyingException | ActivityNotEligibleToBeSoldException e) {
+        } catch (AddingException | BuyingException | SellingException e) {
             e.printStackTrace();
+            fail();
         }
 
         assertEquals(20, user.getClocks());

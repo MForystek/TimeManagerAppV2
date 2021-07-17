@@ -2,6 +2,7 @@ package app;
 
 import app.activities.Activity;
 import app.activities.Schedulable;
+import app.exceptions.SellingException;
 import app.exceptions.BuyingException;
 import app.exceptions.DeletingException;
 import app.exceptions.AddingException;
@@ -38,14 +39,14 @@ public class ActivitiesContainer implements Serializable {
 
     private void addPleasure(Activity activity) throws AddingException {
         if (notBoughtPleasures.containsValue(activity) || notScheduledActivities.containsValue(activity)) {
-            throw new AddingException("Pleasure is already added");
+            throw new AddingException(AddingException.PLEASURE_ALREADY_ADDED);
         }
         notBoughtPleasures.put(activity.getId(), activity);
     }
 
     private void addDuty(Activity activity) throws AddingException {
         if (notScheduledActivities.containsValue(activity)) {
-            throw new AddingException("Duty is already added");
+            throw new AddingException(AddingException.DUTY_ALREADY_ADDED);
         }
         notScheduledActivities.put(activity.getId(), activity);
     }
@@ -62,9 +63,9 @@ public class ActivitiesContainer implements Serializable {
         if (notBoughtPleasures.containsValue(activity)) {
             notBoughtPleasures.remove(activity.getId());
         } else if (notScheduledActivities.containsValue(activity)) {
-            throw new DeletingException("Pleasures must be sold before deletion");
+            throw new DeletingException(DeletingException.SELL_PLEASURE_BEFORE_DELETING);
         } else {
-            throw new DeletingException("Trying to delete not added pleasure");
+            throw new DeletingException(DeletingException.ADD_PLEASURE_BEFORE_DELETING);
         }
     }
 
@@ -72,7 +73,7 @@ public class ActivitiesContainer implements Serializable {
         if (notScheduledActivities.containsValue(activity)) {
             notScheduledActivities.remove(activity.getId());
         } else {
-            throw new DeletingException("Trying to delete not added duty");
+            throw new DeletingException(DeletingException.ADD_DUTY_BEFORE_DELETING);
         }
     }
 
@@ -84,11 +85,26 @@ public class ActivitiesContainer implements Serializable {
 
     private void checkBuyConditions(Activity activity) throws BuyingException {
         if (!activity.isPleasure()) {
-            throw new BuyingException("Duties cannot be bought");
+            throw new BuyingException(BuyingException.CANNOT_BUY_DUTY);
         }
         if (!notBoughtPleasures.containsKey(activity.getId())) {
-            throw new BuyingException("Pleasure eligible for buying not found");
+            throw new BuyingException(BuyingException.PLEASURE_NOT_FOUND);
         }
+    }
+
+    public void sellPleasure(Activity activity) throws SellingException {
+        checkSellConditions(activity);
+        notScheduledActivities.remove(activity.getId());
+        notBoughtPleasures.put(activity.getId(), activity);
+    }
+
+    private void checkSellConditions(Activity activity) throws SellingException {
+         if (!activity.isPleasure()) {
+             throw new SellingException(SellingException.CANNOT_SELL_DUTY);
+         }
+         if (!notScheduledActivities.containsKey(activity.getId())) {
+             throw new SellingException(SellingException.PLEASURE_NOT_FOUND);
+         }
     }
 
     //TODO change collections with activities to private and replace calls to them with below methods

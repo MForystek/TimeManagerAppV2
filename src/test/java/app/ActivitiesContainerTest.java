@@ -2,9 +2,7 @@ package app;
 
 import app.activities.PeriodicActivity;
 import app.activities.ProjectActivity;
-import app.exceptions.BuyingException;
-import app.exceptions.DeletingException;
-import app.exceptions.AddingException;
+import app.exceptions.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -70,14 +68,14 @@ class ActivitiesContainerTest {
             activitiesContainer.addActivity(periodicActivity);
             activitiesContainer.addActivity(periodicActivity);
         } catch (AddingException e) {
-            assertEquals("Pleasure is already added", e.getMessage());
+            assertEquals(AddingException.PLEASURE_ALREADY_ADDED, e.getMessage());
         }
 
         try {
             activitiesContainer.addActivity(projectActivity);
             activitiesContainer.addActivity(projectActivity);
         } catch (AddingException e) {
-            assertEquals("Duty is already added", e.getMessage());
+            assertEquals(AddingException.DUTY_ALREADY_ADDED, e.getMessage());
         }
     }
 
@@ -128,13 +126,13 @@ class ActivitiesContainerTest {
         try {
             activitiesContainer.delActivity(periodicActivity);
         } catch (DeletingException e) {
-            assertEquals("Trying to delete not added pleasure", e.getMessage());
+            assertEquals(DeletingException.ADD_PLEASURE_BEFORE_DELETING, e.getMessage());
         }
 
         try {
             activitiesContainer.delActivity(projectActivity);
         } catch (DeletingException e) {
-            assertEquals("Trying to delete not added duty", e.getMessage());
+            assertEquals(DeletingException.ADD_DUTY_BEFORE_DELETING, e.getMessage());
         }
     }
 
@@ -155,7 +153,7 @@ class ActivitiesContainerTest {
             e.printStackTrace();
             fail();
         } catch (DeletingException e) {
-            assertEquals("Pleasures must be sold before deletion", e.getMessage());
+            assertEquals(DeletingException.SELL_PLEASURE_BEFORE_DELETING, e.getMessage());
         }
     }
 
@@ -204,12 +202,12 @@ class ActivitiesContainerTest {
             e.printStackTrace();
             fail();
         } catch (BuyingException e) {
-            assertEquals("Duties cannot be bought", e.getMessage());
+            assertEquals(BuyingException.CANNOT_BUY_DUTY, e.getMessage());
         }
     }
 
     @Test
-    void buyingNotAddedOrBoughtPleasureThrowsException() {
+    void buyingNotAddedOrAlreadyBoughtPleasureThrowsException() {
         PeriodicActivity periodicActivity = new PeriodicActivity(
                 "Periodic",
                 "Do it as many times as you want",
@@ -234,13 +232,99 @@ class ActivitiesContainerTest {
         try {
             activitiesContainer.buyPleasure(periodicActivity);
         } catch (BuyingException e) {
-            assertEquals("Pleasure eligible for buying not found", e.getMessage());
+            assertEquals(BuyingException.PLEASURE_NOT_FOUND, e.getMessage());
         }
 
         try {
             activitiesContainer.buyPleasure(projectActivity);
         } catch (BuyingException e) {
-            assertEquals("Pleasure eligible for buying not found", e.getMessage());
+            assertEquals(BuyingException.PLEASURE_NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @Test
+    void sellPleasure() {
+        PeriodicActivity periodicActivity = new PeriodicActivity(
+                "Periodic",
+                "Do it as many times as you want",
+                13,
+                5,
+                true);
+        ProjectActivity projectActivity = new ProjectActivity(
+                "Project",
+                "Something bigger",
+                300,
+                300,
+                true);
+
+        try {
+            activitiesContainer.addActivity(periodicActivity);
+            activitiesContainer.addActivity(projectActivity);
+            activitiesContainer.buyPleasure(periodicActivity);
+            activitiesContainer.buyPleasure(projectActivity);
+            activitiesContainer.sellPleasure(periodicActivity);
+            activitiesContainer.sellPleasure(projectActivity);
+        } catch (AddingException | BuyingException | SellingException e) {
+            e.printStackTrace();
+            fail();
+        }
+
+        assertFalse(activitiesContainer.notScheduledActivitiesContainsValue(periodicActivity));
+        assertFalse(activitiesContainer.notScheduledActivitiesContainsValue(projectActivity));
+    }
+
+    @Test
+    void sellingDutyThrowsException() {
+        PeriodicActivity periodicActivity = new PeriodicActivity(
+                "Periodic",
+                "Do it as many times as you want",
+                13,
+                5,
+                false);
+
+        try {
+            activitiesContainer.addActivity(periodicActivity);
+            activitiesContainer.sellPleasure(periodicActivity);
+        } catch (AddingException e) {
+            e.printStackTrace();
+            fail();
+        } catch (SellingException e) {
+            assertEquals(SellingException.CANNOT_SELL_DUTY, e.getMessage());
+        }
+    }
+
+    @Test
+    void sellingNotAddedOrNotBoughtPleasureThrowsException() {
+        PeriodicActivity periodicActivity = new PeriodicActivity(
+                "Periodic",
+                "Do it as many times as you want",
+                13,
+                5,
+                true);
+        ProjectActivity projectActivity = new ProjectActivity(
+                "Project",
+                "Something bigger",
+                300,
+                300,
+                true);
+
+        try {
+            activitiesContainer.addActivity(periodicActivity);
+        } catch (AddingException e) {
+            e.printStackTrace();
+            fail();
+        }
+
+        try {
+            activitiesContainer.sellPleasure(periodicActivity);
+        } catch (SellingException e) {
+            assertEquals(SellingException.PLEASURE_NOT_FOUND, e.getMessage());
+        }
+
+        try {
+            activitiesContainer.sellPleasure(projectActivity);
+        } catch (SellingException e) {
+            assertEquals(SellingException.PLEASURE_NOT_FOUND, e.getMessage());
         }
     }
 }
