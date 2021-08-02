@@ -22,11 +22,10 @@ public class SegmentsExecutor extends Thread {
 
     private void updateSegmentsStates() {
         for (var segment : scheduledSegments) {
-            if (segment.getDateTimeOfStart().isBefore(LocalDateTime.now())) {
-                segment.startOfSegment();
-            }
             if (segment.getDateTimeOfEnd().isBefore(LocalDateTime.now())) {
                 segment.endOfSegment();
+            } else if (segment.getDateTimeOfStart().isBefore(LocalDateTime.now())) {
+                segment.startOfSegment();
             }
         }
     }

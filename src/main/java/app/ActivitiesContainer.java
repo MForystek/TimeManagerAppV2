@@ -8,10 +8,7 @@ import app.exceptions.AddingException;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ActivitiesContainer implements Serializable {
     private Map<Integer, Activity> notBoughtPleasures;
@@ -114,11 +111,13 @@ public class ActivitiesContainer implements Serializable {
     public void schedulePeriodicActivity(PeriodicActivity periodicActivity, LocalDateTime scheduleDateTime, int durationInSeconds) {
         Segment segment = periodicActivity.scheduleSegment(scheduleDateTime, durationInSeconds);
         scheduledSegments.add(segment);
+        Collections.sort(scheduledSegments);
     }
 
     public void scheduleProjectActivity(ProjectActivity projectActivity, LocalDateTime scheduleDateTime, int durationInSeconds) {
         Segment segment = projectActivity.scheduleSegment(scheduleDateTime, durationInSeconds);
         scheduledSegments.add(segment);
+        Collections.sort(scheduledSegments);
     }
 
     public boolean notBoughtPleasuresContainsValue(Activity activity) {
