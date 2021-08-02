@@ -1,8 +1,8 @@
 package app;
 
+import app.exceptions.*;
 import app.activities.PeriodicActivity;
 import app.activities.ProjectActivity;
-import app.exceptions.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,9 +1,6 @@
 package app;
 
-import app.exceptions.AddingException;
-import app.exceptions.BuyingException;
-import app.exceptions.SellingException;
-import app.exceptions.DeletingException;
+import app.exceptions.*;
 import app.activities.PeriodicActivity;
 import app.activities.ProjectActivity;
 import org.junit.jupiter.api.AfterEach;
@@ -24,8 +21,6 @@ class UserTest {
     void after() {
         user = null;
     }
-
-    //TODO Change tests to be compatible with changes in User
 
     @Test
     void addActivity() {
@@ -131,7 +126,22 @@ class UserTest {
 
     @Test
     void deletingBoughtPleasureThrowsException() {
-        //TODO implement it and change other below tests
+        PeriodicActivity periodicActivity = new PeriodicActivity(
+                "Periodic",
+                "Do it as many times as you want",
+                13,
+                5,
+                true);
+
+        user.setClocks(1000);
+        try {
+            user.addActivity(periodicActivity);
+            user.buyPleasure(periodicActivity);
+        } catch (AddingException | BuyingException e) {
+            e.printStackTrace();
+        }
+
+        assertThrows(DeletingException.class, () -> user.delActivity(periodicActivity));
     }
 
     @Test
@@ -150,7 +160,6 @@ class UserTest {
                 true);
 
         user.setClocks(1000);
-
         try {
             user.addActivity(periodicActivity);
             user.addActivity(projectActivity);

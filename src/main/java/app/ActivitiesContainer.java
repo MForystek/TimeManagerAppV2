@@ -1,32 +1,36 @@
 package app;
 
-import app.activities.Activity;
-import app.activities.Schedulable;
+import app.activities.*;
 import app.exceptions.SellingException;
 import app.exceptions.BuyingException;
 import app.exceptions.DeletingException;
 import app.exceptions.AddingException;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ActivitiesContainer implements Serializable {
-    //TODO Move maps and list with activities here
-    // It will manage activities of the user
-
     private Map<Integer, Activity> notBoughtPleasures;
     private Map<Integer, Activity> notScheduledActivities;
-    private List<Schedulable> scheduledSegments;
-    private Map<Integer, Activity> completedActivities;
+    private List<Segment> scheduledSegments;
+    private Map<Integer, Segment> completedSegments;
+    private Map<Integer, ProjectActivity> completedProjects;
+    private SegmentsExecutor segmentsExecutor;
+    //TODO after segment is ended move it to completedSegments
+    //TODO after project is ended move it to completedProjects
 
     public ActivitiesContainer() {
         notBoughtPleasures = new HashMap<>();
         notScheduledActivities = new HashMap<>();
         scheduledSegments = new ArrayList<>();
-        completedActivities = new HashMap<>();
+        completedSegments = new HashMap<>();
+        completedProjects = new HashMap<>();
+        segmentsExecutor = new SegmentsExecutor(scheduledSegments);
+        segmentsExecutor.start();
     }
 
     public void addActivity(Activity activity) throws AddingException {
@@ -107,7 +111,16 @@ public class ActivitiesContainer implements Serializable {
          }
     }
 
-    //TODO change collections with activities to private and replace calls to them with below methods
+    public void schedulePeriodicActivity(PeriodicActivity periodicActivity, LocalDateTime scheduleDateTime, int durationInSeconds) {
+        Segment segment = periodicActivity.scheduleSegment(scheduleDateTime, durationInSeconds);
+        scheduledSegments.add(segment);
+    }
+
+    public void scheduleProjectActivity(ProjectActivity projectActivity, LocalDateTime scheduleDateTime, int durationInSeconds) {
+        Segment segment = projectActivity.scheduleSegment(scheduleDateTime, durationInSeconds);
+        scheduledSegments.add(segment);
+    }
+
     public boolean notBoughtPleasuresContainsValue(Activity activity) {
         return notBoughtPleasures.containsValue(activity);
     }

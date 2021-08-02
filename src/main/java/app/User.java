@@ -8,15 +8,8 @@ import app.exceptions.AddingException;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class User implements Serializable {
-    //TODO Change methods in class to call ActivitiesContainer instead of fields, then remove unnecessary fields
-    //TODO Ensure that logic related to adding and removing clocks works after upper changes
-
     private ActivitiesContainer activitiesContainer;
     private int clocks;
 
@@ -56,14 +49,6 @@ public class User implements Serializable {
     }
 
     public void cancelActivity() {
-
-    }
-
-    public void startActivity() {
-
-    }
-
-    public void finishActivity() {
 
     }
 
